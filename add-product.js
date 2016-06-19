@@ -4,25 +4,23 @@ var fs = require("fs");
 var maxIdFile = './max-id.json';
 var productsFile = './products.json';
 
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     fs.readFile(productsFile, 'utf-8', function (err, fileContent) {
         if (err) {
-            console.error(err.stack());
-            res.sendStatus(500);
 
-            return;
+            return next(err);
         }
         var productsData = JSON.parse(fileContent);
 
-        getInputProduct(productsData, req, res);
+        getInputProduct(productsData, req, res, next);
     });
 });
 
-function getInputProduct(productsData, req, res) {
+function getInputProduct(productsData, req, res, next) {
     var product = req.body;
 
     if (isExist(product) && isRight(product)) {
-        addProduct(productsData, product, res);
+        addProduct(productsData, product, res, next);
     }
     else {
         res.sendStatus(400);
@@ -45,12 +43,11 @@ function isRight(product) {
         typeof(product.price) === "number";
 }
 
-function addProduct(productsData, product, res) {
+function addProduct(productsData, product, res, next) {
     fs.readFile(maxIdFile, 'utf-8', function (err, productsId) {
         if (err) {
-            res.sendStatus(500);
 
-            return;
+            return next(err);
         }
         productsId = JSON.parse(productsId);
         productsId.maxId++;
@@ -66,22 +63,20 @@ function addProduct(productsData, product, res) {
         productsData.push(item);
         res.status(201).json(productsData[productsData.length - 1]);
 
-        writeAllProductsData(productsId, productsData, res);
+        writeAllProductsData(productsId, productsData, next);
     });
 }
 
-function writeAllProductsData(productsId, productsData, res) {
+function writeAllProductsData(productsId, productsData, next) {
     fs.writeFile(maxIdFile, JSON.stringify(productsId), function (err) {
         if (err) {
-            console.error(err.stack());
-            res.sendStatus(500);
+            return next(err);
         }
     });
 
     fs.writeFile(productsFile, JSON.stringify(productsData), function (err) {
         if (err) {
-            console.error(err.stack());
-            res.sendStatus(500);
+            return next(err);
         }
     });
 }

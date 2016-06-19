@@ -13,7 +13,7 @@ function initMaxIdFile() {
 function initFile() {
     fs.open(maxIdFile, 'a', function (err) {
         if (err) {
-            console.error(err.stack());
+            console.error(err.stack);
 
             return;
         }
@@ -24,7 +24,7 @@ function initFile() {
 function writeId() {
     fs.writeFile(maxIdFile, JSON.stringify({"maxId": 0}), 'utf-8', function (err) {
         if (err) {
-            console.error(err.stack());
+            console.error(err.stack);
         }
     });
 }
